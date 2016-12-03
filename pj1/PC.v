@@ -10,7 +10,7 @@ module PC
 // Ports
 input               clk_i;
 input               rst_i;
-input               start_i;
+input               start_i; // 0: has hazard(stall), 1: no hazard
 input   [31:0]      pc_i;
 output  [31:0]      pc_o;
 
