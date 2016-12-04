@@ -11,94 +11,244 @@ input               rst_i;
 input               start_i;
 
 wire[31:0]	inst_addr, inst;
+wire[31:0]  pcPlus4;
+wire[4:0]   writeReg;
+wire    WB_RegWrite, MEM_RegWrite;
+wire[31:0]  RSout, RTout;
+wire[31:0]  signExtended, EXsignextended;
+wire[31:0]  MUX1Res, JumpAddr, MUX7out;
+wire ANDresult;
+wire MUX2_sel;
+wire[4:0] EXRT, MEMRD;
+wire[3:0] EXEX;
+wire[1:0] EXM, MEMWBcontrol;
+wire[31:0] MEMALURes, MUX5Res;
+wire[7:0] MUX8_o;
+wire [1:0] MEMM;
+wire [1:0] WBWB;
+assign JumpAddr = {Shift_Left_26to28.data_o,MUX1Res[31:28]};
+assign WB_RegWrite = WBWB[1];
+
 
 Control Control(
-    .Op_i       (inst[31:26]),
-    .RegDst_o   (MUX_RegDst.select_i),
-    .ALUOp_o    (ALU_Control.ALUOp_i),
-    .ALUSrc_o   (MUX_ALUSrc.select_i),
-    .RegWrite_o (Registers.RegWrite_i)
+    .Op_i(inst[31:26]),
+    .Jump_o(MUX2_sel),
+    .Branch_o(),
+    .Control_o()
 );
+
 
 Adder Add_PC(
     .data1_in   (inst_addr),
     .data2_in   (32'd4),
-    .data_o     (PC.pc_i)
-);
+    .data_o     (pcPlus4)
+);//DONE
+
+Adder Add_Branch(
+    .data1_in   (Shift_Left_32.data_o),
+    .data2_in   (IFID.pc_o),
+    .data_o     (MUX32_1.data1_i)
+);//DONE
 
 PC PC(
     .clk_i      (clk_i),
     .rst_i      (rst_i),
     .start_i    (start_i),
-    .pc_i       (Add_PC.data_o),
+    .pchazard_i (HazardDetection.pchazard_o),
+    .pc_i       (MUX32_2.data_o),
     .pc_o       (inst_addr)
-);
+);//DONE
 
 IFID IFID(
     .clk_i      (clk_i),
-    .flush_i(),
-    .hazard_i(),
-    .pc_i(),
-    .inst_i(),
-    .pc_o(),
-    .inst_o(),
-);
+    .flush_i(OR.flush_o),
+    .hazard_i(HazardDetection.IFIDhazard_o),
+    .pc_i(pcPlus4),
+    .inst_i(Instruction_Memory.instr_o),
+    .pc_o(Add_Branch.data2_in),
+    .inst_o(inst)
+);//DONE
 
-IFID IFID(
-    .clk_i      (clk_i),
-    .pc_i(),
-    
-
-);
-
+IDEX IDEX(
+    .clk_i(clk_i),
+    .WB_i(MUX8_o[7:6]),
+    .M_i(MUX8_o[5:4]),
+    .EX_i(MUX8_o[3:0]),
+    .pc_i(),    //leave it empty
+    .data1_i(RSout),
+    .data2_i(RTout),
+    .signextend_i(signExtended),
+    .rs_i(inst[25:21]),
+    .rt_i(inst[20:16]),
+    .rd_i(inst[15:11]),
+    .WB_o(EXMEM.WB_i),
+    .M_o(EXM),
+    .EX_o(EXEX),
+    .data1_o(MUXforward_6.data_i),
+    .data2_o(MUXforward_7.data_i),
+    .signextend_o(EXsignextended),
+    .rs_o(Forward_Unit.IDEX_RegisterRs_i),
+    .rt_o(EXRT),
+    .rd_o(MUX5_3.data2_i)
+);//DONE
+EXMEM EXMEM(
+    .clk_i(clk_i),
+    .WB_i(IDEX.WB_o),
+    .M_i(EXM),
+    .addr_i(ALU.data_o),
+    .data_i(MUX7out),
+    .rd_i(MUX3.data_o),
+    .WB_o(MEMWBcontrol),
+    .M_o(MEMM),
+    .addr_o(MEMALURes),
+    .data_o(Data_Memory.writedata_i),
+    .rd_o(MEMRD)
+);//DONE
+MEMWB MEMWB(
+    .clk_i(clk_i),
+    .WB_i(MEMWBcontrol),
+    .addr_i(MEMALURes),
+    .data_i(Data_Memory.readdata_o),
+    .rd_i(MEMRD),
+    .WB_o(WBWB),
+    .addr_o(MUX32_5.data2_i),
+    .data_o(MUX32_5.data1_i),
+    .rd_o(writeReg)
+);//DONE
+Forward_Unit Forward_Unit(
+    .EXMEM_RegWrite_i(MEMWBcontrol[1]),
+    .EXMEM_RegisterRd_i(MEMRD),
+    .MEMWB_RegWrite_i(WB_RegWrite),
+    .MEMWB_RegisterRd_i(writeReg),
+    .IDEX_RegisterRs_i(IDEX.rs_o),
+    .IDEX_RegisterRt_i(EXRT),
+    .ForwardA_o(MUXforward_6.select_i),
+    .ForwardB_o(MUXforward_7.select_i)  
+);//DONE
+HazardDetection HazardDetection(
+    .inst_i(inst), 
+    .EXregRTaddr_i(EXRT), 
+    .EXmemRead_i(EXM[1]), 
+    .pchazard_o(PC.pchazard_i), 
+    .IFIDhazard_o(IFID.hazard_i), 
+    .mux8select_o(MUX8_8.harzard_i)
+);//DONE
+Data_Memory Data_Memory(
+    .addr_i(MEMALURes),
+    .writedata_i(EXMEM.data_o),
+    .memread_i(MEMM[1]),
+    .memwrite_i(MEMM[0]), 
+    .readdata_o(MEMWB.data_i),
+); //DONE
 Instruction_Memory Instruction_Memory(
     .addr_i     (inst_addr),
-    .instr_o    (inst)
-);
+    .instr_o    (IFID.inst_i)
+);//DONE
 
+MUX32 MUX32_1(
+    .data1_i(Add_Branch.data_o),
+    .data2_i(pcPlus4),
+    .select_i(ANDresult),
+    .data_o(MUX1Res)
+);//DONE
+MUX32 MUX32_2(
+    .data1_i(MUX1Res),
+    .data2_i(JumpAddr),
+    .select_i(MUX2_sel),
+    .data_o(PC.pc_i)
+);//DONE
+MUX5 MUX5_3(
+    .data1_i    (EXRT),
+    .data2_i    (IDEX.rd_o),
+    .select_i   (EXEX[0]),
+    .data_o     (EXMEM.rd_i)
+);//DONE
+MUX32 MUX32_4(
+    .data1_i    (MUX7out),
+    .data2_i    (EXsignextended),
+    .select_i   (EXEX[3]),
+    .data_o     (ALU.data2_i)
+);//DONE
+MUX32 MUX32_5(
+    .data1_i(MEMWB.data_o),
+    .data2_i(MEMWE.addr_o),
+    .select_i(WBWB[0]),
+    .data_o(MUX5Res)
+);//DONE
+MUX_forward MUXforward_6(
+    .select_i(Forward_Unit.ForwardA_o),
+    .data_i(IDEX.data1_o),
+    .forward_EM_i(MEMALURes),
+    .forward_MW_i(MUX5Res),
+    .data_o(ALU.data1_i)
+);//DONE
+MUX_forward MUXforward_7(
+    .select_i(Forward_Unit.ForwardB_o),
+    .data_i(IDEX.data2_o),
+    .forward_EM_i(MEMALURes),
+    .forward_MW_i(MUX5Res),
+    .data_o(MUX7out)
+);//DONE
+MUX8 MUX8_8(
+    .harzard_i(HazardDetection.mux8select_o),
+    .signal_i(Control.Control_o),
+    .signal_o(MUX8_o)
+);//DONE
+Equal Equal(
+    .data1_i(RSout),
+    .data2_i(RTout),
+    .eq_o(AND.eq_i)
+);//DONE
+Shift_Left_32 Shift_Left_32(
+    .data_i(signExtended),
+    .data_o(Add_Branch.data1_in)  
+);//DONE
+
+Shift_Left_26to28 Shift_Left_26to28(
+    .data_i(inst[25:0]),
+    .data_o(JumpAddr[31:4])  
+);//DONE
+
+AND AND(
+    .eq_i(Equal.eq_o),
+    .branch_i(Control.Branch_o),
+    .select_o(ANDresult)
+);//DONE
+
+OR OR(
+    .jump_i(MUX2_sel),
+    .branch_i(ANDresult),
+    .flush_o(IFID.flush_i)
+);//DONE
 Registers Registers(
     .clk_i      (clk_i),
     .RSaddr_i   (inst[25:21]),
     .RTaddr_i   (inst[20:16]),
-    .RDaddr_i   (MUX_RegDst.data_o),
-    .RDdata_i   (ALU.data_o),
-    .RegWrite_i (Control.RegWrite_o),
-    .RSdata_o   (ALU.data1_i),
-    .RTdata_o   (MUX_ALUSrc.data1_i)
-);
-
-MUX5 MUX_RegDst(
-    .data1_i    (inst[20:16]),
-    .data2_i    (inst[15:11]),
-    .select_i   (Control.RegDst_o),
-    .data_o     (Registers.RDaddr_i)
-);
-
-MUX32 MUX_ALUSrc(
-    .data1_i    (Registers.RTdata_o),
-    .data2_i    (Sign_Extend.data_o),
-    .select_i   (Control.ALUSrc_o),
-    .data_o     (ALU.data2_i)
-);
+    .RDaddr_i   (writeReg),
+    .RDdata_i   (MUX5Res),
+    .RegWrite_i (WB_RegWrite),
+    .RSdata_o   (RSout),
+    .RTdata_o   (RTout)
+);//DONE
 
 Sign_Extend Sign_Extend(
     .data_i     (inst[15:0]),
-    .data_o     (MUX_ALUSrc.data2_i)
-);
+    .data_o     (signExtended)
+);//DONE
   
 ALU ALU(
-    .data1_i    (Registers.RSdata_o),
-    .data2_i    (MUX_ALUSrc.data_o),
+    .data1_i    (MUXforward_6.data_o),
+    .data2_i    (MUX32_4.data_o),
     .ALUCtrl_i  (ALU_Control.ALUCtrl_o),
-    .data_o     (Registers.RDdata_i),
+    .data_o     (EXMEM.addr_i),
     .Zero_o     ()
-);
+);//DONE
 
 ALU_Control ALU_Control(
-    .funct_i    (inst[5:0]),
-    .ALUOp_i    (Control.ALUOp_o),
+    .funct_i    (EXsignextended[5:0]),
+    .ALUOp_i    (EXEX[2:1]),
     .ALUCtrl_o  (ALU.ALUCtrl_i)
-);
+);//DONE
 
 endmodule
 
