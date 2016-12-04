@@ -2,7 +2,6 @@ module MEMWB
 (
     clk_i,
 	WB_i,
-	M_i,
 	addr_i,
 	data_i,
 	rd_i,
@@ -15,7 +14,6 @@ module MEMWB
 // Ports
 input               clk_i;
 input	[1:0]       WB_i;
-input   [2:0]       M_i;
 input   [31:0]      addr_i;
 input   [31:0]      data_i;
 input	[4:0]		rd_i;
