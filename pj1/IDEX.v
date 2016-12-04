@@ -25,7 +25,7 @@ module IDEX
 // Ports
 input               clk_i;
 input	[1:0]       WB_i;
-input   [2:0]       M_i;
+input   [1:0]       M_i;
 input   [3:0]       EX_i;
 input   [31:0]      pc_i;
 input   [31:0]      data1_i;
@@ -35,7 +35,7 @@ input	[4:0]		rs_i;
 input	[4:0]		rt_i;
 input	[4:0]		rd_i;
 output	[1:0]		WB_o;
-output	[2:0]		M_o;
+output	[1:0]		M_o;
 output	[3:0]		EX_o;
 output  [31:0]      data1_o;
 output  [31:0]      data2_o;
@@ -46,7 +46,7 @@ output	[4:0]		rd_o;
 
 // Wires & Registers
 reg		[1:0]		WB_o;
-reg		[2:0]		M_o;
+reg		[1:0]		M_o;
 reg		[3:0]		EX_o;
 reg		[31:0]      data1_o;
 reg		[31:0]      data2_o;
