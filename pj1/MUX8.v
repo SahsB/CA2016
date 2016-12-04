@@ -5,14 +5,14 @@ module MUX1
 	signal_o
 );
 
-input signal_i;
+input [7:0] signal_i;
 input harzard_i;
-output signal_o;
-reg signal_o;
+output [7:0] signal_o;
+reg [7:0] signal_o;
 
 always@(*) begin
 	if(harzard_i) begin
-		signal_o = 1'b0;
+		signal_o = 8'd0;
 	end
 	else begin
 		signal_o = signal_i;
