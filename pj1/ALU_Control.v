@@ -13,8 +13,14 @@ reg [2:0] tmp;
 assign ALUCtrl_o = tmp;
 
 always@(*) begin
-	if(ALUOp_i == 2'd0) begin
+	if(ALUOp_i == 2'b00) begin // add
 		tmp = 3'b010;
+	end
+	else if(ALUOp_i == 2'b01) begin // sub
+		tmp = 3'b110;
+	end
+	else if(ALUOp_i == 2'b10) begin // or
+		tmp = 3'b001;
 	end
 	else begin
 		case(funct_i)
