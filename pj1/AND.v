@@ -1,4 +1,4 @@
-module OR
+module AND
 (
 	eq_i,
 	branch_i,
@@ -9,6 +9,6 @@ input eq_i;
 input branch_i;
 output select_o;
 
-assign select_o = eq_i | branch_i;
+assign select_o = eq_i & branch_i;
 
 endmodule

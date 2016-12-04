@@ -34,6 +34,23 @@ PC PC(
     .pc_o       (inst_addr)
 );
 
+IFID IFID(
+    .clk_i      (clk_i),
+    .flush_i(),
+    .hazard_i(),
+    .pc_i(),
+    .inst_i(),
+    .pc_o(),
+    .inst_o(),
+);
+
+IFID IFID(
+    .clk_i      (clk_i),
+    .pc_i(),
+    
+
+);
+
 Instruction_Memory Instruction_Memory(
     .addr_i     (inst_addr),
     .instr_o    (inst)
