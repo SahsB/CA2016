@@ -47,7 +47,7 @@ Adder Add_PC(
 Adder Add_Branch(
     .data1_in   (Shift_Left_32.data_o),
     .data2_in   (IFID.pc_o),
-    .data_o     (MUX32_1.data1_i)
+    .data_o     (MUX32_1.data2_i)
 );//DONE
 
 PC PC(
@@ -97,7 +97,7 @@ EXMEM EXMEM(
     .M_i(EXM),
     .addr_i(ALU.data_o),
     .data_i(MUX7out),
-    .rd_i(MUX3.data_o),
+    .rd_i(MUX5_3.data_o),
     .WB_o(MEMWBcontrol),
     .M_o(MEMM),
     .addr_o(MEMALURes),
@@ -111,8 +111,8 @@ MEMWB MEMWB(
     .data_i(Data_Memory.readdata_o),
     .rd_i(MEMRD),
     .WB_o(WBWB),
-    .addr_o(MUX32_5.data2_i),
-    .data_o(MUX32_5.data1_i),
+    .addr_o(MUX32_5.data1_i),
+    .data_o(MUX32_5.data2_i),
     .rd_o(writeReg)
 );//DONE
 Forward_Unit Forward_Unit(
@@ -146,8 +146,8 @@ Instruction_Memory Instruction_Memory(
 );//DONE
 
 MUX32 MUX32_1(
-    .data1_i(Add_Branch.data_o),
-    .data2_i(pcPlus4),
+    .data1_i(pcPlus4),
+    .data2_i(Add_Branch.data_o),
     .select_i(ANDresult),
     .data_o(MUX1Res)
 );//DONE
@@ -170,8 +170,8 @@ MUX32 MUX32_4(
     .data_o     (ALU.data2_i)
 );//DONE
 MUX32 MUX32_5(
-    .data1_i(MEMWB.data_o),
-    .data2_i(MEMWE.addr_o),
+    .data1_i(MEMWB.addr_o),
+    .data2_i(MEMWB.data_o),
     .select_i(WBWB[0]),
     .data_o(MUX5Res)
 );//DONE
@@ -249,6 +249,5 @@ ALU_Control ALU_Control(
     .ALUOp_i    (EXEX[2:1]),
     .ALUCtrl_o  (ALU.ALUCtrl_i)
 );//DONE
-
 endmodule
 

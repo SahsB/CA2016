@@ -14,7 +14,7 @@ output [4:0] data_o;
 assign data_o = tmp;
 
 always@(*) begin
-	if(~select_i) begin
+	if(select_i) begin
 		tmp = data2_i;
 	end
 	else begin

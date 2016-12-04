@@ -56,6 +56,7 @@ reg		[4:0]		rt_o;
 reg		[4:0]		rd_o;
 
 initial begin
+	#10
 	WB_o = 0;
 	M_o = 0;
 	EX_o = 0;

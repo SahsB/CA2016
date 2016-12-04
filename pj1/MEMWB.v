@@ -29,6 +29,7 @@ reg		[31:0]      data_o;
 reg		[4:0]		rd_o;
 
 initial begin
+#20
 	WB_o = 0;
 	addr_o = 0;
 	data_o = 0;
