@@ -33,9 +33,9 @@ assign WB_RegWrite = WBWB[1];
 Control Control(
     .Op_i(inst[31:26]),
     .Jump_o(MUX2_sel),
-    .Branch_o(),
-    .Control_o()
-);
+    .Branch_o(AND.branch_i),
+    .Control_o(MUX8_8.signal_i)
+);//DONE
 
 
 Adder Add_PC(
@@ -138,7 +138,7 @@ Data_Memory Data_Memory(
     .writedata_i(EXMEM.data_o),
     .memread_i(MEMM[1]),
     .memwrite_i(MEMM[0]), 
-    .readdata_o(MEMWB.data_i),
+    .readdata_o(MEMWB.data_i)
 ); //DONE
 Instruction_Memory Instruction_Memory(
     .addr_i     (inst_addr),
