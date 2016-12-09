@@ -19,7 +19,6 @@ output  [31:0]      pc_o;
 // Wires & Registers
 reg     [31:0]      pc_o;
 
-
 always@(posedge clk_i or negedge rst_i) begin
     if(~rst_i) begin
         pc_o <= 32'b0;

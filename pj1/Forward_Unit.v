@@ -29,7 +29,7 @@ always@(*)
 begin
 	
 	if ( (MEMWB_RegWrite_i) && (MEMWB_RegisterRd_i != 0) && (MEMWB_RegisterRd_i == IDEX_RegisterRt_i) && (EXMEM_RegisterRd_i != IDEX_RegisterRt_i) )  ForwardB_o = 2'b01;
-	else if ( (EXMEM_RegWrite_i) && (EXMEM_RegisterRd_i != 0) && (EXMEM_RegisterRd_i == IDEX_RegisterRt_i) )  ForwardA_o = 2'b10;
+	else if ( (EXMEM_RegWrite_i) && (EXMEM_RegisterRd_i != 0) && (EXMEM_RegisterRd_i == IDEX_RegisterRt_i) )  ForwardB_o = 2'b10;
 	else ForwardB_o = 2'b00;
 end
 

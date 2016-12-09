@@ -13,7 +13,7 @@ assign data_o = tmp;
 always@(*) begin
 	tmp[15:0] = data_i[15:0];
 	if(data_i[15]) begin
-		tmp[31:16] = 16'd255;
+		tmp[31:16] = 16'd65535;
 	end
 	else begin
 		tmp[31:16] = 16'd0;

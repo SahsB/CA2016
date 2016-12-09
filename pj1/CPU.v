@@ -26,7 +26,7 @@ wire[31:0] MEMALURes, MUX5Res;
 wire[7:0] MUX8_o;
 wire [1:0] MEMM;
 wire [1:0] WBWB;
-assign JumpAddr = {Shift_Left_26to28.data_o,MUX1Res[31:28]};
+assign JumpAddr = {MUX1Res[31:28], Shift_Left_26to28.data_o};
 assign WB_RegWrite = WBWB[1];
 
 
@@ -206,7 +206,7 @@ Shift_Left_32 Shift_Left_32(
 
 Shift_Left_26to28 Shift_Left_26to28(
     .data_i(inst[25:0]),
-    .data_o(JumpAddr[31:4])  
+    .data_o()  
 );//DONE
 
 AND AND(
