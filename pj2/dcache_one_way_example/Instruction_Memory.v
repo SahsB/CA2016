@@ -9,7 +9,7 @@ input   [31:0]      addr_i;
 output  [31:0]      instr_o;
 
 // Instruction memory
-reg     [31:0]      memory  [0:511];
+reg     [31:0]     memory  [0:255]; //1KB
 
 assign  instr_o = memory[addr_i>>2];  
 
