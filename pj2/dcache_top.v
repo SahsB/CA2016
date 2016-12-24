@@ -119,20 +119,20 @@ assign	cache_dirty  = write_hit;
 
 // tag comparator
 //!!! add you code here!  (hit=...?,  r_hit_data=...?)
-assign hit = (sramtag == p1_tag && sram_valid)? 1'b1: 1'b0;
+assign hit = (sram_tag == p1_tag && sram_valid)? 1'b1: 1'b0;
 assign r_hit_data = sram_cache_data;
 	
 // read data :  256-bit to 32-bit
 always@(p1_offset or r_hit_data) begin
 	//!!! add you code here! (p1_data=...?)
     if (hit == 1 && p1_offset == 0) p1_data = r_hit_data[31:0];
-    else if (hit == 1 && p1_offset == 8) p1_data = r_hit_data[63:32];
-    else if (hit == 1 && p1_offset == 12) p1_data = r_hit_data[95:64];
-    else if (hit == 1 && p1_offset == 16) p1_data = r_hit_data[127:96];
-    else if (hit == 1 && p1_offset == 20) p1_data = r_hit_data[159:128];
-    else if (hit == 1 && p1_offset == 24) p1_data = r_hit_data[191:160];
-    else if (hit == 1 && p1_offset == 28) p1_data = r_hit_data[223:192];
-    else if (hit == 1 && p1_offset == 32) p1_data = r_hit_data[255:224];
+    else if (hit == 1 && p1_offset == 4) p1_data = r_hit_data[63:32];
+    else if (hit == 1 && p1_offset == 8) p1_data = r_hit_data[95:64];
+    else if (hit == 1 && p1_offset == 12) p1_data = r_hit_data[127:96];
+    else if (hit == 1 && p1_offset == 16) p1_data = r_hit_data[159:128];
+    else if (hit == 1 && p1_offset == 20) p1_data = r_hit_data[191:160];
+    else if (hit == 1 && p1_offset == 24) p1_data = r_hit_data[223:192];
+    else if (hit == 1 && p1_offset == 28) p1_data = r_hit_data[255:224];
     else p1_data = 32'b0;    
 end
 
@@ -142,12 +142,12 @@ always@(p1_offset or r_hit_data or p1_data_i) begin
 	//!!! add you code here! (w_hit_data=...?)
     w_hit_data = { (p1_offset == 28)? p1_data_i:r_hit_data[255:224],
                    (p1_offset == 24)? p1_data_i:r_hit_data[223:192],
-                   (p1_offset == 24)? p1_data_i:r_hit_data[191:160],
-                   (p1_offset == 24)? p1_data_i:r_hit_data[159:128],
-                   (p1_offset == 24)? p1_data_i:r_hit_data[127: 96],
-                   (p1_offset == 24)? p1_data_i:r_hit_data[ 95: 64],
-                   (p1_offset == 24)? p1_data_i:r_hit_data[ 63: 32],
-                   (p1_offset == 24)? p1_data_i:r_hit_data[ 31:  0]};
+                   (p1_offset == 20)? p1_data_i:r_hit_data[191:160],
+                   (p1_offset == 16)? p1_data_i:r_hit_data[159:128],
+                   (p1_offset == 12)? p1_data_i:r_hit_data[127: 96],
+                   (p1_offset == 8)? p1_data_i:r_hit_data[ 95: 64],
+                   (p1_offset == 4)? p1_data_i:r_hit_data[ 63: 32],
+                   (p1_offset == 0)? p1_data_i:r_hit_data[ 31:  0]};
 end
 
 
