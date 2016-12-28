@@ -1,5 +1,5 @@
 compile:
-	iverilog -o *.v
+	iverilog -o test *.v
 
 run:
 	vvp test
